@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lecture Summarizer</title>
+    <!-- Modern Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="blob-bg"></div>
+    <div class="blob-bg blob-2"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-microphone-lines"></i>
+                <h1>Lecture<span>Summarizer</span></h1>
+            </div>
+            <p class="subtitle">Convert audio to structured, smart notes instantly</p>
+        </header>
+
+        <main>
+            <section class="upload-section glass-panel">
+                <h2>Upload Lecture</h2>
+                <div class="drop-zone" id="dropZone">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>Drag & Drop your audio file here or <strong>browse</strong></p>
+                    <span class="file-info">Supported formats: .wav, .mp3 (WAV recommended)</span>
+                    <input type="file" id="fileInput" accept=".wav,.mp3" hidden>
+                </div>
+                
+                <div class="selected-file" id="selectedFile" style="display: none;">
+                    <i class="fa-solid fa-file-audio"></i>
+                    <span id="fileName">lecture.wav</span>
+                    <button class="remove-btn" id="removeFile" aria-label="Remove file"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <button class="primary-btn" id="summarizeBtn" disabled>
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Summary
+                </button>
+
+                <div class="loading-state" id="loadingState" style="display: none;">
+                    <div class="spinner"></div>
+                    <p id="loadingStatus">Uploading audio...</p>
+                    <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
+                </div>
+            </section>
+
+            <section class="results-section glass-panel" id="resultsSection" style="display: none;">
+                <div class="tabs">
+                    <button class="tab-btn active" data-target="keyPointsTab">Key Points</button>
+                    <button class="tab-btn" data-target="summaryTab">Full Summary</button>
+                    <button class="tab-btn" data-target="transcriptTab">Transcript</button>
+                </div>
+
+                <div class="tab-content active" id="keyPointsTab">
+                    <h3>Important Highlights</h3>
+                    <ul class="key-points-list" id="keyPointsList">
+                        <!-- Key points populate here -->
+                    </ul>
+                </div>
+
+                <div class="tab-content" id="summaryTab">
+                    <h3>Lecture Summary</h3>
+                    <p class="summary-text" id="summaryText"></p>
+                </div>
+
+                <div class="tab-content" id="transcriptTab">
+                    <h3>Raw Transcript</h3>
+                    <div class="transcript-box" id="transcriptText"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
