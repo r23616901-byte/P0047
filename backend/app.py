@@ -1,6 +1,6 @@
 """
-AI-Based Lecture Summarizer - Audio to Text Module
-Backend Server using Flask and OpenAI Whisper
+AI-Based Lecture Summarizer - Complete Backend
+Includes: Audio Transcription (Whisper) + NLP Processing (T5)
 """
 
 from flask import Flask, request, jsonify
@@ -10,6 +10,9 @@ import os
 import tempfile
 from datetime import datetime
 
+# Import NLP Pipeline
+from nlp.pipeline import process_transcript, NLPPipeline
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
 
@@ -18,6 +21,11 @@ CORS(app)  # Enable CORS for frontend communication
 print("Loading Whisper model...")
 model = whisper.load_model("base")
 print("Whisper model loaded successfully!")
+
+# Initialize NLP Pipeline
+print("Initializing NLP Pipeline...")
+nlp_pipeline = NLPPipeline(summarizer_model="t5-small", num_key_points=5)
+print("NLP Pipeline initialized!")
 
 # Configure upload settings
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a', 'ogg', 'flac'}
@@ -285,12 +293,84 @@ def summarize_audio():
             'error': f'Processing failed: {str(e)}'
         }), 500
 
+@app.route('/process-text', methods=['POST'])
+def process_text():
+    """
+    Endpoint to process raw text through NLP pipeline
+    Cleans text, generates summary, and extracts key points
+    
+    Request:
+        - text: string (JSON body)
+        - aggressive_cleaning: boolean (optional)
+    
+    Response:
+        - success: boolean
+        - cleaned_text: string
+        - summary: string
+        - key_points: list
+        - stats: dict
+    """
+    try:
+        # Check if request has JSON data
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'Request must be JSON format'
+            }), 400
+        
+        data = request.get_json()
+        
+        # Check if text is provided
+        if not data or 'text' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'No text provided. Please include "text" in request body.'
+            }), 400
+        
+        text = data['text'].strip()
+        
+        # Check if text is too short
+        if len(text) < 10:
+            return jsonify({
+                'success': False,
+                'error': 'Text too short. Please provide more content (minimum 10 characters).'
+            }), 400
+        
+        aggressive_cleaning = data.get('aggressive_cleaning', False)
+        
+        # Process through NLP pipeline
+        print(f"Processing text through NLP pipeline... ({len(text)} characters)")
+        result = nlp_pipeline.process(text, aggressive_cleaning=aggressive_cleaning)
+        
+        if result['success']:
+            print("✅ NLP processing complete!")
+            return jsonify({
+                'success': True,
+                'cleaned_text': result['cleaned_text'],
+                'summary': result['summary'],
+                'key_points': result['key_points'],
+                'stats': result['stats']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'NLP processing failed')
+            }), 500
+            
+    except Exception as e:
+        print(f"Error during text processing: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Processing failed: {str(e)}'
+        }), 500
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
         'model': 'whisper-base',
+        'nlp_model': 't5-small',
         'timestamp': datetime.now().isoformat()
     })
 
@@ -298,22 +378,34 @@ def health_check():
 def index():
     """Root endpoint with API info"""
     return jsonify({
-        'name': 'AI-Based Lecture Summarizer - Full API',
-        'version': '2.0.0',
+        'name': 'AI-Based Lecture Summarizer - Complete API',
+        'version': '3.0.0',
+        'modules': ['Audio Transcription (Whisper)', 'NLP Processing (T5)'],
         'endpoints': {
             'POST /transcribe': 'Upload audio file and get transcript',
             'POST /summarize': 'Upload audio file and get transcript + summary + key points',
+            'POST /process-text': 'Process raw text through NLP pipeline (clean + summarize + key points)',
             'GET /health': 'Health check endpoint'
         },
         'supported_formats': list(ALLOWED_EXTENSIONS),
-        'max_file_size': f'{MAX_FILE_SIZE // (1024*1024)}MB'
+        'max_file_size': f'{MAX_FILE_SIZE // (1024*1024)}MB',
+        'nlp_features': ['Text Cleaning', 'T5 Summarization', 'Key Points Extraction']
     })
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("AI-Based Lecture Summarizer - Audio to Text Server")
+    print("AI-Based Lecture Summarizer - Complete Server")
     print("=" * 60)
-    print(f"Supported formats: {', '.join(ALLOWED_EXTENSIONS)}")
+    print("Modules Loaded:")
+    print("  ✓ Audio Transcription (Whisper Base)")
+    print("  ✓ NLP Pipeline (T5-Small)")
+    print(f"Supported audio formats: {', '.join(ALLOWED_EXTENSIONS)}")
     print(f"Max file size: {MAX_FILE_SIZE // (1024*1024)}MB")
+    print("=" * 60)
+    print("Endpoints:")
+    print("  POST /transcribe  - Audio to text")
+    print("  POST /summarize   - Audio to summary + key points")
+    print("  POST /process-text - Text to summary + key points")
+    print("  GET  /health      - Health check")
     print("=" * 60)
     app.run(debug=True, host='0.0.0.0', port=5000)
