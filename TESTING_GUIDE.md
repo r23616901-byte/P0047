@@ -1,294 +1,426 @@
-# Testing Guide - Audio to Text Module
+# 🧪 AI Lecture Summarizer - Complete Testing Guide
 
-## Quick Test Run
-
-### 1. Start Backend Server
-
-**Option A: Using Script (Recommended)**
-
-macOS/Linux:
-```bash
-cd backend
-chmod +x run.sh
-./run.sh
-```
-
-Windows:
-```cmd
-cd backend
-run.bat
-```
-
-**Option B: Manual Setup**
-```bash
-cd backend
-python -m venv venv
-# Windows: venv\Scripts\activate
-# macOS/Linux: source venv/bin/activate
-pip install -r requirements.txt
-python app.py
-```
-
-You should see:
-```
-============================================================
-AI-Based Lecture Summarizer - Audio to Text Server
-============================================================
-Supported formats: mp3, wav, m4a, ogg, flac
-Max file size: 50MB
-============================================================
- * Running on http://0.0.0.0:5000
-```
-
-### 2. Start Frontend
-
-Open a **new terminal**:
-```bash
-npm run dev
-```
-
-You should see:
-```
-VITE ready in XXX ms
-➜  Local:   http://localhost:5173/
-```
-
-### 3. Test in Browser
-
-1. Open `http://localhost:5173` in your browser
-2. You should see the AI-Based Lecture Summarizer interface
+## Testing Checklist for Judges/Demo
 
 ---
 
-## Test Scenarios
+## 📋 Pre-Testing Setup
 
-### ✅ Test 1: Successful Transcription
+### ✅ Prerequisites Check
 
-**Steps:**
-1. Prepare a short audio file (MP3 or WAV, 1-2 minutes)
-2. Click or drag the file to the upload area
-3. Verify file name appears in the preview
-4. Click "Convert to Text"
-5. Wait for processing (loading spinner appears)
-6. Verify transcript appears in the output box
-
-**Expected Result:**
-- ✅ File uploads successfully
-- ✅ Loading indicator shows during processing
-- ✅ Transcript displays after completion
-- ✅ Language and duration shown (if available)
+- [ ] FFmpeg installed (`ffmpeg -version`)
+- [ ] Backend running (`http://localhost:5000`)
+- [ ] Frontend open in browser
+- [ ] Microphone permissions granted
+- [ ] Test audio files ready
 
 ---
 
-### ✅ Test 2: File Format Validation
+## 🎯 Test Scenarios (10 Critical Tests)
+
+### Test 1: Upload Valid Audio File ✅
 
 **Steps:**
-1. Try to upload a `.txt` or `.pdf` file
-2. Observe the error message
+1. Open application
+2. Click on upload area or drag & drop audio file
+3. Select a valid MP3/WAV file (< 50MB)
+4. Verify file name and size display
+5. Click "Summarize Lecture" button
 
-**Expected Result:**
+**Expected Results:**
+- ✅ File name appears in preview
+- ✅ File size displayed correctly
+- ✅ "Summarize" button becomes enabled
+- ✅ Loading spinner appears
+- ✅ Output section displays with 3 tabs
+- ✅ Transcript shows full text
+- ✅ Summary shows condensed version
+- ✅ Key Points shows bullet list
+- ✅ Word counts displayed
+
+**Pass Criteria:** All output sections populated correctly
+
+---
+
+### Test 2: Upload Invalid File Format ❌
+
+**Steps:**
+1. Click upload area
+2. Select a non-audio file (e.g., .txt, .pdf, .jpg)
+3. Observe error message
+
+**Expected Results:**
 - ✅ Error message: "Unsupported file format"
-- ✅ Allowed formats listed: mp3, wav, m4a, ogg, flac
+- ✅ List of supported formats shown
+- ✅ File not accepted
+- ✅ Summarize button remains disabled
+
+**Pass Criteria:** Clear error message, file rejected
 
 ---
 
-### ✅ Test 3: File Size Validation
+### Test 3: Upload File Exceeding Size Limit ❌
 
 **Steps:**
-1. Try to upload a file larger than 50MB
-2. Observe the error message
+1. Attempt to upload file > 50MB
+2. Observe validation
 
-**Expected Result:**
-- ✅ Error message: "File too large. Maximum size is 50MB"
+**Expected Results:**
+- ✅ Error message: "File size exceeds 50MB limit"
+- ✅ File not processed
+- ✅ No upload to server
+
+**Pass Criteria:** Size validation working
 
 ---
 
-### ✅ Test 4: No File Submission
+### Test 4: No File Upload Validation ⚠️
 
 **Steps:**
 1. Don't upload any file
-2. The convert button should be disabled or show a message
+2. Try to click Summarize button (should be disabled)
+3. Or upload, remove file, try to summarize
 
-**Expected Result:**
-- ✅ Convert button is disabled until file is uploaded
-- ✅ Or shows message: "Please select an audio file first"
+**Expected Results:**
+- ✅ Summarize button disabled initially
+- ✅ After file removal, button disabled again
+- ✅ If forced, shows: "Please upload or record an audio file first"
 
----
-
-### ✅ Test 5: Backend Connection Error
-
-**Steps:**
-1. Stop the backend server (Ctrl+C)
-2. Try to convert an audio file from the frontend
-3. Observe the error message
-
-**Expected Result:**
-- ✅ Error message about server connection
-- ✅ Helpful message: "Cannot connect to backend server"
+**Pass Criteria:** Proper validation prevents empty submission
 
 ---
 
-### ✅ Test 6: Copy Transcript
+### Test 5: Audio Recording Feature 🎤
 
 **Steps:**
-1. Successfully transcribe an audio file
-2. Click the "Copy" button
-3. Paste into a text editor
+1. Click "Record Audio" tab
+2. Click "Start Recording" button
+3. Allow microphone permission if prompted
+4. Speak for 10-15 seconds
+5. Click "Stop Recording"
+6. Verify audio preview appears
 
-**Expected Result:**
-- ✅ Transcript copied to clipboard
-- ✅ Success message appears
+**Expected Results:**
+- ✅ Recording status shows "Recording..."
+- ✅ Status indicator blinks red
+- ✅ Timer shows duration
+- ✅ Live transcript displays (if supported)
+- ✅ Audio player appears after stop
+- ✅ Can play recorded audio
+- ✅ Summarize button enabled
+
+**Pass Criteria:** Recording works end-to-end
 
 ---
 
-### ✅ Test 7: Download Transcript
+### Test 6: Live Transcript Display 📝
 
 **Steps:**
-1. Successfully transcribe an audio file
-2. Click the "Download" button
-3. Check downloads folder
+1. Go to Record tab
+2. Start recording
+3. Speak clearly
+4. Watch live transcript area
 
-**Expected Result:**
-- ✅ TXT file downloaded
-- ✅ Filename format: `transcript-YYYY-MM-DD.txt`
-- ✅ File contains the full transcript
+**Expected Results:**
+- ✅ Live transcript section appears
+- ✅ Text appears as you speak
+- ✅ Updates in real-time
+- ✅ Shows "Listening..." when active
+
+**Pass Criteria:** Real-time speech recognition working
 
 ---
 
-### ✅ Test 8: Remove File
+### Test 7: Download Notes Feature 📥
 
 **Steps:**
-1. Upload an audio file
-2. Click the X (remove) button on the file preview
-3. Verify the file is removed
+1. Process an audio file
+2. Wait for results
+3. Click "Download" button
+4. Check downloaded file
 
-**Expected Result:**
-- ✅ File preview disappears
-- ✅ Upload area is ready for new file
-- ✅ Convert button is disabled
+**Expected Results:**
+- ✅ File downloads automatically
+- ✅ Filename: `lecture-notes-[timestamp].txt`
+- ✅ File contains:
+  - Header with timestamp
+  - Full transcript
+  - Summary section
+  - Key points list
+  - Footer
+
+**Pass Criteria:** Complete notes exported correctly
 
 ---
 
-### ✅ Test 9: Multiple Conversions
+### Test 8: Copy to Clipboard Feature 📋
 
 **Steps:**
-1. Transcribe first audio file
-2. Remove the file
-3. Upload a different audio file
-4. Transcribe again
+1. Process audio file
+2. Navigate to Summary tab
+3. Click "Copy" button
+4. Paste in text editor
 
-**Expected Result:**
-- ✅ Second transcription works correctly
-- ✅ Previous transcript is replaced
-- ✅ No errors or conflicts
+**Expected Results:**
+- ✅ Toast notification: "Copied to clipboard!"
+- ✅ Content pastes correctly
+- ✅ Works for all tabs (Transcript, Summary, Key Points)
+
+**Pass Criteria:** Clipboard functionality working
 
 ---
 
-### ✅ Test 10: API Health Check
+### Test 9: Dark Mode Toggle 🌙
 
 **Steps:**
-1. With backend running, open browser
-2. Go to: `http://localhost:5000/health`
-3. Check the response
+1. Click moon/sun icon (top right)
+2. Observe theme change
+3. Click again to toggle back
 
-**Expected Result:**
-```json
-{
-  "status": "healthy",
-  "model": "whisper-base",
-  "timestamp": "2026-01-15T10:30:00"
-}
+**Expected Results:**
+- ✅ Theme switches between light/dark
+- ✅ Icon changes (moon ↔ sun)
+- ✅ All colors update properly
+- ✅ Theme persists on refresh
+- ✅ Smooth transition animation
+
+**Pass Criteria:** Theme toggle fully functional
+
+---
+
+### Test 10: Search in Notes 🔍
+
+**Steps:**
+1. Process audio file with substantial content
+2. Type a word in search bar
+3. Observe highlighting
+4. Clear search
+
+**Expected Results:**
+- ✅ Search bar functional
+- ✅ Matching text highlighted in yellow
+- ✅ Works across all tabs
+- ✅ Clear button appears when typing
+- ✅ Highlights removed when cleared
+
+**Pass Criteria:** Search and highlight working
+
+---
+
+## 🎨 UI/UX Quality Tests
+
+### Visual Design
+
+- [ ] Clean, modern interface
+- [ ] Consistent color scheme
+- [ ] Proper spacing and alignment
+- [ ] Professional typography
+- [ ] Smooth animations
+- [ ] No visual glitches
+
+### Responsiveness
+
+- [ ] Works on desktop (1920x1080)
+- [ ] Works on laptop (1366x768)
+- [ ] Works on tablet (768x1024)
+- [ ] Works on mobile (375x667)
+- [ ] No horizontal scrolling
+- [ ] Touch-friendly buttons
+
+### User Feedback
+
+- [ ] Loading indicator visible
+- [ ] Success messages shown
+- [ ] Error messages clear
+- [ ] Button states (disabled/enabled)
+- [ ] Hover effects present
+- [ ] Toast notifications work
+
+---
+
+## 🔗 API Integration Tests
+
+### Backend Connection
+
+**Test Endpoint: GET /health**
+```bash
+curl http://localhost:5000/health
 ```
+Expected: `{"status": "healthy", "model": "whisper-base"}`
+
+**Test Endpoint: POST /summarize**
+```bash
+curl -X POST http://localhost:5000/summarize \
+  -F "audio=@test.mp3"
+```
+Expected: JSON with transcript, summary, key_points
+
+**Test Endpoint: GET /**
+```bash
+curl http://localhost:5000/
+```
+Expected: API information
 
 ---
 
-## Sample Test Audio
+## 📊 Performance Tests
 
-If you don't have test audio files, you can:
+### Speed Benchmarks
 
-### Option 1: Record Your Own
-- Use your phone or computer to record a short voice memo
-- Save as MP3 or WAV
-- Keep it under 50MB
-
-### Option 2: Download Sample Audio
-- Find free sample audio files online
-- Ensure they are in supported formats (MP3, WAV, M4A, OGG, FLAC)
-
-### Option 3: Use Online Test Files
-- Search for "sample MP3 file" or "test audio WAV"
-- Many websites provide free sample audio files
-
----
-
-## Performance Expectations
-
-| Audio Length | Processing Time (approx) |
+| Audio Length | Expected Processing Time |
 |--------------|-------------------------|
-| 1 minute     | 10-20 seconds           |
-| 5 minutes    | 1-2 minutes             |
-| 10 minutes   | 2-4 minutes             |
-| 30 minutes   | 5-10 minutes            |
+| 1 minute | ~30-60 seconds |
+| 5 minutes | ~3-5 minutes |
+| 10 minutes | ~6-10 minutes |
 
-*Times vary based on system specs and model size*
+### Resource Usage
 
----
-
-## Common Issues & Solutions
-
-### Issue: "Module not found: whisper"
-**Solution:**
-```bash
-cd backend
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-pip install -r requirements.txt
-```
-
-### Issue: "FFmpeg not found"
-**Solution:**
-- Install FFmpeg (see README.md)
-- Restart terminal after installation
-- Verify: `ffmpeg -version`
-
-### Issue: "Port 5000 already in use"
-**Solution:**
-```bash
-# Find and kill the process using port 5000
-# macOS/Linux:
-lsof -i :5000
-kill -9 <PID>
-
-# Windows:
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
-```
-
-### Issue: Slow transcription
-**Solution:**
-- Use smaller Whisper model in `app.py`:
-  ```python
-  model = whisper.load_model("tiny")  # Faster, less accurate
-  ```
+- [ ] No memory leaks
+- [ ] Files cleaned up after processing
+- [ ] Browser doesn't freeze during processing
+- [ ] Smooth scrolling in output
 
 ---
 
-## Success Criteria
+## 🌐 Browser Compatibility
 
-✅ All 10 test scenarios pass
-✅ No console errors in browser
-✅ No errors in backend terminal
-✅ Transcript is accurate and readable
-✅ UI is responsive and user-friendly
-✅ Error messages are clear and helpful
+| Browser | Upload | Recording | Dark Mode | Search |
+|---------|--------|-----------|-----------|--------|
+| Chrome | ✅ | ✅ | ✅ | ✅ |
+| Edge | ✅ | ✅ | ✅ | ✅ |
+| Firefox | ✅ | ⚠️ | ✅ | ✅ |
+| Safari | ✅ | ⚠️ | ✅ | ✅ |
 
----
-
-## Next Steps After Testing
-
-1. ✅ All tests pass → Ready for Task 2 (Summarization)
-2. ⚠️ Some tests fail → Review error messages and fix issues
-3. ❌ Major issues → Check backend logs and browser console
+⚠️ Recording may have limited support in Firefox/Safari
 
 ---
 
-**Happy Testing! 🎉**
+## 🚨 Error Handling Tests
+
+### Network Errors
+
+- [ ] Backend not running → Clear error message
+- [ ] Slow connection → Loading timeout
+- [ ] Server error → Graceful fallback
+
+### File Errors
+
+- [ ] Corrupted audio → Error message
+- [ ] Empty file → Validation error
+- [ ] Wrong extension → Format error
+
+### Permission Errors
+
+- [ ] Microphone denied → Helpful message
+- [ ] Camera access (if needed) → Proper handling
+
+---
+
+## 📱 Mobile Testing
+
+### Touch Interactions
+
+- [ ] Tap to upload works
+- [ ] Drag & drop adapted for mobile
+- [ ] Buttons are touch-friendly (min 44px)
+- [ ] No hover-dependent features
+- [ ] Keyboard doesn't break layout
+
+### Mobile Layout
+
+- [ ] Header scales properly
+- [ ] Cards stack vertically
+- [ ] Tabs remain accessible
+- [ ] Text remains readable
+- [ ] No overflow issues
+
+---
+
+## ♿ Accessibility Tests
+
+- [ ] Keyboard navigation works
+- [ ] Tab order is logical
+- [ ] Focus indicators visible
+- [ ] Alt text on icons (where applicable)
+- [ ] Color contrast sufficient
+- [ ] Screen reader friendly
+
+---
+
+## 🎯 Demo Flow for Judges (5 Minutes)
+
+### Minute 1: Introduction
+1. Show landing page
+2. Explain features
+3. Highlight clean UI
+
+### Minute 2: Upload Demo
+1. Upload sample lecture audio
+2. Show file preview
+3. Click Summarize
+4. Show loading state
+
+### Minute 3: Results Display
+1. Show Transcript tab
+2. Switch to Summary tab
+3. Show Key Points tab
+4. Demonstrate search feature
+
+### Minute 4: Advanced Features
+1. Toggle dark mode
+2. Copy summary to clipboard
+3. Download notes
+4. Show history panel
+
+### Minute 5: Recording Demo
+1. Switch to Record tab
+2. Record short sample
+3. Show live transcript
+4. Process recording
+5. Show results
+
+---
+
+## ✅ Final Checklist
+
+### Before Demo
+- [ ] Backend running
+- [ ] Test files ready
+- [ ] Microphone working
+- [ ] Internet connection stable
+- [ ] Browser console clear
+- [ ] Demo script prepared
+
+### During Demo
+- [ ] Speak clearly
+- [ ] Show all features
+- [ ] Explain technical choices
+- [ ] Handle errors gracefully
+- [ ] Keep within time limit
+
+### After Demo
+- [ ] Answer questions
+- [ ] Show code structure
+- [ ] Explain future enhancements
+- [ ] Provide documentation
+
+---
+
+## 📈 Scoring Rubric (For Judges)
+
+| Category | Weight | Score |
+|----------|--------|-------|
+| Functionality | 30% | /30 |
+| UI/UX Design | 25% | /25 |
+| Code Quality | 20% | /20 |
+| Innovation | 15% | /15 |
+| Documentation | 10% | /10 |
+| **Total** | **100%** | **/100** |
+
+---
+
+**Testing completed: ___________**
+
+**Tester signature: ___________**
+
+**Date: ___________**
