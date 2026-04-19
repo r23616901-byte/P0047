@@ -1,0 +1,16 @@
+# AI-Based Lecture Summarizer - Backend Dependencies
+# Python 3.8+ required
+
+# Web Framework
+Flask==3.0.0
+flask-cors==4.0.0
+
+# OpenAI Whisper for Speech Recognition
+openai-whisper==20231117
+
+# Audio Processing
+numpy==1.24.3
+torch==2.1.0
+
+# Utilities
+python-dotenv==1.0.0
