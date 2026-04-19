@@ -69,6 +69,71 @@ def generate_summary(transcript):
     
     return '. '.join(summary_sentences) + '.'
 
+def extract_highlights(transcript, summary):
+    """Extract important highlights/phrases from transcript"""
+    if not transcript:
+        return []
+    
+    highlights = []
+    
+    # Extract key phrases and important terms
+    # Look for capitalized words, technical terms, and important concepts
+    import re
+    
+    # Find potential highlights (short important phrases)
+    sentences = [s.strip() for s in transcript.replace('!', '.').replace('?', '.').split('.') if s.strip() and len(s.strip()) > 10]
+    
+    # Keywords that indicate highlight-worthy content
+    highlight_indicators = [
+        'introduction', 'overview', 'fundamentals', 'basics',
+        'advanced', 'technique', 'method', 'approach',
+        'important', 'critical', 'essential', 'key concept',
+        'definition', 'example', 'application', 'result',
+        'conclusion', 'summary', 'finding', 'discovery'
+    ]
+    
+    for sentence in sentences[:10]:  # Limit to first 10 sentences
+        sentence_lower = sentence.lower()
+        for indicator in highlight_indicators:
+            if indicator in sentence_lower:
+                # Extract a short phrase (max 10 words)
+                words = sentence.split()[:10]
+                phrase = ' '.join(words).rstrip('.') + '.'
+                if len(phrase) > 15 and phrase not in highlights:
+                    highlights.append(phrase)
+                break
+    
+    # If no highlights found, extract from summary
+    if len(highlights) < 3 and summary:
+        summary_sentences = summary.split('.')
+        for sent in summary_sentences[:3]:
+            sent = sent.strip()
+            if len(sent) > 10 and sent not in highlights:
+                highlights.append(sent + '.')
+    
+    # Limit to top 5 highlights
+    return highlights[:5]
+
+
+def generate_structured_notes(transcript, summary, key_points):
+    """Generate structured notes with all sections"""
+    highlights = extract_highlights(transcript, summary)
+    
+    structured_notes = {
+        'summary': summary,
+        'key_points': key_points,
+        'highlights': highlights,
+        'metadata': {
+            'word_count': len(transcript.split()),
+            'sentence_count': transcript.count('.') + transcript.count('!') + transcript.count('?'),
+            'key_points_count': len(key_points),
+            'highlights_count': len(highlights)
+        }
+    }
+    
+    return structured_notes
+
+
 def extract_key_points(transcript):
     """Extract key points from transcript"""
     if not transcript:
@@ -265,17 +330,23 @@ def summarize_audio():
             # Extract key points
             key_points = extract_key_points(transcript)
             
+            # Generate structured notes with highlights
+            structured_notes = generate_structured_notes(transcript, summary, key_points)
+            
             # Clean up temporary file
             os.unlink(temp_filename)
             
             print("✅ Processing complete!")
             
-            # Return successful response
+            # Return successful response with structured notes
             return jsonify({
                 'success': True,
                 'transcript': transcript,
                 'summary': summary,
                 'key_points': key_points,
+                'highlights': structured_notes['highlights'],
+                'structured_notes': structured_notes,
+                'metadata': structured_notes['metadata'],
                 'language': result.get('language', 'unknown'),
                 'duration': result.get('segments', [{}])[-1].get('end', 0) if result.get('segments') else 0
             })

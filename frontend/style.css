@@ -776,6 +776,42 @@ body {
     font-weight: bold;
 }
 
+/* Highlights Box */
+.highlights-box {
+    background: linear-gradient(135deg, var(--bg-color) 0%, rgba(99, 102, 241, 0.05) 100%);
+    padding: 25px;
+    border-radius: var(--radius-sm);
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid rgba(99, 102, 241, 0.1);
+}
+
+.highlights-box ul {
+    list-style: none;
+}
+
+.highlights-box li {
+    padding: 15px 20px;
+    margin-bottom: 12px;
+    background: var(--card-bg);
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--secondary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+    line-height: 1.6;
+    transition: var(--transition);
+}
+
+.highlights-box li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.highlights-box li::before {
+    content: "✨";
+    margin-right: 10px;
+}
+
 /* Highlight Search Results */
 .highlight {
     background: rgba(245, 158, 11, 0.3);

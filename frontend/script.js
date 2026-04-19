@@ -62,12 +62,16 @@ const elements = {
     transcriptContent: document.getElementById('transcriptContent'),
     summaryContent: document.getElementById('summaryContent'),
     keypointsContent: document.getElementById('keypointsContent'),
+    highlightsContent: document.getElementById('highlightsContent'),
     transcriptText: document.getElementById('transcriptText'),
     summaryText: document.getElementById('summaryText'),
     keypointsList: document.getElementById('keypointsList'),
+    highlightsList: document.getElementById('highlightsList'),
+    highlightsBox: document.getElementById('highlightsBox'),
     transcriptWordCount: document.getElementById('transcriptWordCount'),
     summaryWordCount: document.getElementById('summaryWordCount'),
     pointsCount: document.getElementById('pointsCount'),
+    highlightsCount: document.getElementById('highlightsCount'),
     
     // Actions
     copyBtn: document.getElementById('copyBtn'),
@@ -438,13 +442,16 @@ function initializeOutputTabs() {
             elements.transcriptContent.classList.remove('active');
             elements.summaryContent.classList.remove('active');
             elements.keypointsContent.classList.remove('active');
+            elements.highlightsContent.classList.remove('active');
             
             if (output === 'transcript') {
                 elements.transcriptContent.classList.add('active');
             } else if (output === 'summary') {
                 elements.summaryContent.classList.add('active');
-            } else {
+            } else if (output === 'keypoints') {
                 elements.keypointsContent.classList.add('active');
+            } else if (output === 'highlights') {
+                elements.highlightsContent.classList.add('active');
             }
         });
     });
@@ -553,6 +560,22 @@ function displayResults(data) {
     }
     elements.pointsCount.textContent = `${keyPoints.length} points`;
     
+    // Highlights (NEW - Phase 1 Structured Notes)
+    const highlights = data.highlights || [];
+    elements.highlightsList.innerHTML = '';
+    if (highlights.length > 0) {
+        highlights.forEach(highlight => {
+            const li = document.createElement('li');
+            li.textContent = highlight;
+            elements.highlightsList.appendChild(li);
+        });
+    } else {
+        const li = document.createElement('li');
+        li.textContent = 'No highlights extracted';
+        elements.highlightsList.appendChild(li);
+    }
+    elements.highlightsCount.textContent = `${highlights.length} highlights`;
+    
     // Show output section
     elements.outputSection.classList.remove('hidden');
     
@@ -589,6 +612,14 @@ For next class, please review the concepts of overfitting and underfitting, and 
             'Key algorithms: Linear Regression, Decision Trees, Random Forests, SVMs, Neural Networks',
             'Start with simple models before moving to complex ones',
             'Understanding overfitting and underfitting is crucial for model performance'
+        ],
+        
+        highlights: [
+            'Machine Learning fundamentals and core concepts',
+            'Three main types: Supervised, Unsupervised, Reinforcement',
+            'Key algorithms for different problem types',
+            'Importance of model selection and evaluation',
+            'Overfitting and underfitting concepts'
         ]
     };
     
@@ -630,9 +661,12 @@ function handleCopy() {
         textToCopy = elements.transcriptText.textContent;
     } else if (activeTab === 'summary') {
         textToCopy = elements.summaryText.textContent;
-    } else {
+    } else if (activeTab === 'keypoints') {
         textToCopy = Array.from(elements.keypointsList.querySelectorAll('li'))
             .map(li => `• ${li.textContent}`).join('\n');
+    } else if (activeTab === 'highlights') {
+        textToCopy = Array.from(elements.highlightsList.querySelectorAll('li'))
+            .map(li => `✨ ${li.textContent}`).join('\n');
     }
     
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -651,6 +685,8 @@ function handleDownload() {
     const summary = elements.summaryText.textContent;
     const keyPoints = Array.from(elements.keypointsList.querySelectorAll('li'))
         .map(li => `• ${li.textContent}`).join('\n');
+    const highlights = Array.from(elements.highlightsList.querySelectorAll('li'))
+        .map(li => `✨ ${li.textContent}`).join('\n');
     
     const content = `AI LECTURE SUMMARIZER
 =====================
@@ -670,6 +706,11 @@ ${summary}
 KEY POINTS
 ---------------------------------
 ${keyPoints}
+
+---------------------------------
+HIGHLIGHTS
+---------------------------------
+${highlights}
 
 =====================
 Powered by AI Lecture Summarizer
