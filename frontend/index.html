@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lecture Summarizer - Convert Lectures into Smart Notes</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>AI Lecture Summarizer</h1>
+            </div>
+            <p class="subtitle">Convert lectures into smart notes instantly</p>
+            <div class="features-badge">
+                <span><i class="fas fa-microphone"></i> Upload Audio</span>
+                <span><i class="fas fa-record-vinyl"></i> Record Live</span>
+                <span><i class="fas fa-file-alt"></i> Get Summary</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h2><i class="fas fa-upload"></i> Input Audio</h2>
+                
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn active" data-tab="upload">
+                        <i class="fas fa-file-upload"></i> Upload File
+                    </button>
+                    <button class="tab-btn" data-tab="record">
+                        <i class="fas fa-microphone"></i> Record Audio
+                    </button>
+                </div>
+
+                <!-- Upload Tab -->
+                <div class="tab-content active" id="uploadTab">
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="audioFile" accept=".mp3,.wav,.m4a,.ogg,.flac" hidden>
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Drag & Drop Audio File Here</h3>
+                        <p>or click to browse</p>
+                        <p class="supported-formats">Supported: MP3, WAV, M4A, OGG, FLAC (Max 50MB)</p>
+                    </div>
+                    
+                    <!-- File Preview -->
+                    <div class="file-preview hidden" id="filePreview">
+                        <div class="file-info">
+                            <i class="fas fa-file-audio"></i>
+                            <div class="file-details">
+                                <span class="file-name" id="fileName">lecture.mp3</span>
+                                <span class="file-size" id="fileSize">5.2 MB</span>
+                            </div>
+                        </div>
+                        <button class="remove-file-btn" id="removeFileBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Record Tab -->
+                <div class="tab-content" id="recordTab">
+                    <div class="recording-section">
+                        <div class="recording-status" id="recordingStatus">
+                            <div class="status-indicator"></div>
+                            <span>Ready to Record</span>
+                        </div>
+                        
+                        <div class="recording-controls">
+                            <button class="record-btn" id="startRecordBtn">
+                                <i class="fas fa-microphone"></i>
+                                <span>Start Recording</span>
+                            </button>
+                            <button class="record-btn stop hidden" id="stopRecordBtn">
+                                <i class="fas fa-stop"></i>
+                                <span>Stop Recording</span>
+                            </button>
+                        </div>
+
+                        <!-- Live Transcript Preview -->
+                        <div class="live-transcript hidden" id="liveTranscript">
+                            <h4><i class="fas fa-closed-captioning"></i> Live Transcript</h4>
+                            <div class="transcript-text" id="liveTranscriptText">
+                                Start speaking to see live transcription...
+                            </div>
+                        </div>
+
+                        <!-- Recorded Audio Preview -->
+                        <div class="audio-preview hidden" id="audioPreview">
+                            <h4><i class="fas fa-headphones"></i> Recorded Audio</h4>
+                            <audio id="recordedAudio" controls></audio>
+                            <div class="recorded-info">
+                                <span id="recordingDuration">00:00</span>
+                                <button class="re-record-btn" id="reRecordBtn">
+                                    <i class="fas fa-redo"></i> Re-record
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="summarize-btn" id="summarizeBtn" disabled>
+                        <i class="fas fa-magic"></i>
+                        <span>Summarize Lecture</span>
+                    </button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div class="loading-container hidden" id="loadingContainer">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Processing your lecture...</p>
+                    <p class="loading-subtext">This may take a few moments</p>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message hidden" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText"></span>
+                </div>
+
+                <!-- Success Message -->
+                <div class="success-message hidden" id="successMessage">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Processing complete!</span>
+                </div>
+            </section>
+
+            <!-- Output Section (Hidden Initially) -->
+            <section class="output-section card hidden" id="outputSection">
+                <div class="output-header">
+                    <h2><i class="fas fa-file-alt"></i> Lecture Notes</h2>
+                    <div class="output-actions">
+                        <button class="action-btn" id="copyBtn" title="Copy to Clipboard">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button class="action-btn" id="downloadBtn" title="Download as TXT">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="action-btn" id="newSessionBtn" title="Start New">
+                            <i class="fas fa-plus"></i> New
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search in notes...">
+                    <button class="clear-search hidden" id="clearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Tabs for Output -->
+                <div class="output-tabs">
+                    <button class="output-tab active" data-output="transcript">
+                        <i class="fas fa-file-lines"></i> Transcript
+                    </button>
+                    <button class="output-tab" data-output="summary">
+                        <i class="fas fa-brain"></i> Summary
+                    </button>
+                    <button class="output-tab" data-output="keypoints">
+                        <i class="fas fa-list-check"></i> Key Points
+                    </button>
+                    <button class="output-tab" data-output="highlights">
+                        <i class="fas fa-highlighter"></i> Highlights
+                    </button>
+                </div>
+
+                <!-- Output Content -->
+                <div class="output-content">
+                    <!-- Transcript Tab -->
+                    <div class="output-tab-content active" id="transcriptContent">
+                        <div class="content-header">
+                            <h3><i class="fas fa-comment-alt"></i> Full Transcript</h3>
+                            <span class="word-count" id="transcriptWordCount">0 words</span>
+                        </div>
+                        <div class="transcript-box" id="transcriptBox">
+                            <p id="transcriptText"></p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Tab -->
+                    <div class="output-tab-content" id="summaryContent">
+                        <div class="content-header">
+                            <h3><i class="fas fa-lightbulb"></i> Summary</h3>
+                            <span class="word-count" id="summaryWordCount">0 words</span>
+                        </div>
+                        <div class="summary-box" id="summaryBox">
+                            <p id="summaryText"></p>
+                        </div>
+                    </div>
+
+                    <!-- Key Points Tab -->
+                    <div class="output-tab-content" id="keypointsContent">
+                        <div class="content-header">
+                            <h3><i class="fas fa-star"></i> Key Points</h3>
+                            <span class="points-count" id="pointsCount">0 points</span>
+                        </div>
+                        <div class="keypoints-box" id="keypointsBox">
+                            <ul id="keypointsList"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Highlights Tab -->
+                    <div class="output-tab-content" id="highlightsContent">
+                        <div class="content-header">
+                            <h3><i class="fas fa-sparkles"></i> Important Highlights</h3>
+                            <span class="points-count" id="highlightsCount">0 highlights</span>
+                        </div>
+                        <div class="highlights-box" id="highlightsBox">
+                            <ul id="highlightsList"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Section (Optional) -->
+            <section class="history-section card hidden" id="historySection">
+                <h2><i class="fas fa-history"></i> Recent Summaries</h2>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be added here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>AI Lecture Summarizer &copy; 2026 | Powered by Whisper AI & NLP</p>
+            <div class="footer-links">
+                <a href="#" id="showHistoryLink"><i class="fas fa-history"></i> History</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast hidden" id="toast">
+        <i class="fas fa-info-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
