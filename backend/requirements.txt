@@ -1,3 +1,11 @@
+bhoomika
+fastapi
+uvicorn
+python-multipart
+torch
+transformers
+SpeechRecognition
+
 # AI-Based Lecture Summarizer - Backend Dependencies
 # Python 3.8+ required
 
@@ -30,3 +38,4 @@ python-dotenv==1.0.0
 
 # Optional: For better tokenization
 tokenizers==0.15.0
+ main
